@@ -1,70 +1,105 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE HTML>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control y Monitoreo de Caudales</title>
+  <title>Control de Relés y Visualización de Caudales</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 20px;
-    }
-    iframe {
-      margin: 10px 0;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 10px;
-      cursor: pointer;
+    html { font-family: Arial; text-align: center; margin: 0; padding: 0; }
+    body { margin: 0; background-color: #E6F2FF; }
+    .header {
+      background-color: #0056B3;
+      color: white;
+      padding: 10px 0;
+      font-size: 1.5rem;
     }
     .container {
-      margin-bottom: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .iframe-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      border: 2px solid #0056B3;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    iframe {
+      border: 1px solid #cccccc;
+      width: 450px;
+      height: 260px;
+    }
+    .button {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+    .button:hover {
+      background-color: #0056B3;
+    }
+    .button:active {
+      background-color: #003D80;
     }
   </style>
 </head>
 <body>
-  <h1>Control y Monitoreo de Caudales</h1>
 
-  <!-- ESP32 #1 -->
-  <div class="container">
-    <h2>ESP32 #1</h2>
-    <h3>Caudal</h3>
-    <iframe width="450" height="260" style="border: 1px solid #cccccc;" 
-            src="https://thingspeak.com/channels/2753974/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line">
-    </iframe>
-    <h3>Control de Relé</h3>
-    <button onclick="controlRelay('https://api.thingspeak.com/update?api_key=BF67WC3Y2CCQEIHC&field2=1')">Encender Relé</button>
-    <button onclick="controlRelay('https://api.thingspeak.com/update?api_key=BF67WC3Y2CCQEIHC&field2=0')">Apagar Relé</button>
-  </div>
+  <div class="header">Control de Electrovalvulas y Visualización de Caudales</div>
 
-  <!-- ESP32 #2 -->
   <div class="container">
-    <h2>ESP32 #2</h2>
-    <h3>Caudal</h3>
-    <iframe width="450" height="260" style="border: 1px solid #cccccc;" 
-            src="https://thingspeak.com/channels/2753974/charts/3?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line">
-    </iframe>
-    <h3>Control de Relé</h3>
-    <button onclick="controlRelay('https://api.thingspeak.com/update?api_key=BF67WC3Y2CCQEIHC&field4=1')">Encender Relé</button>
-    <button onclick="controlRelay('https://api.thingspeak.com/update?api_key=BF67WC3Y2CCQEIHC&field4=0')">Apagar Relé</button>
+    <!-- ESP32 Board #1 -->
+    <div class="iframe-container">
+      <h3>ESP32 Nodo de entrada</h3>
+      <iframe src="https://thingspeak.com/channels/2753974/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line"></iframe>
+      <button class="button" id="button1" onclick="toggleRelay(1, 'https://api.thingspeak.com/update?api_key=BF67WC3Y2CCQEIHC&field2=')">Encender</button>
+    </div>
+
+    <!-- ESP32 Board #2 -->
+    <div class="iframe-container">
+      <h3>ESP32 Nodo Interno</h3>
+      <iframe src="https://thingspeak.com/channels/2753974/charts/3?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line"></iframe>
+      <button class="button" id="button2" onclick="toggleRelay(2, 'https://api.thingspeak.com/update?api_key=BF67WC3Y2CCQEIHC&field4=')">Encender</button>
+    </div>
   </div>
 
   <script>
-    function controlRelay(url) {
-      fetch(url)
+    // Estados iniciales de los relés (0 = apagado, 1 = encendido)
+    let states = { 1: 0, 2: 0 };
+
+    // Función para alternar el estado del relé
+    function toggleRelay(board, baseUrl) {
+      const button = document.getElementById(`button${board}`);
+      const newState = states[board] === 0 ? 1 : 0;
+      
+      // Actualiza el estado en ThingSpeak
+      fetch(baseUrl + newState)
         .then(response => {
           if (response.ok) {
-            alert("Comando enviado con éxito.");
+            // Actualiza el estado local y el texto del botón
+            states[board] = newState;
+            button.textContent = newState === 1 ? "Apagar" : "Encender";
+            alert(`Relé ${board} ${newState === 1 ? "encendido" : "apagado"} correctamente`);
           } else {
-            alert("Error al enviar el comando.");
+            alert("Error al enviar el comando");
           }
         })
         .catch(error => {
-          alert("Error de red: " + error.message);
+          alert("Error de conexión: " + error);
         });
     }
   </script>
+
 </body>
 </html>
