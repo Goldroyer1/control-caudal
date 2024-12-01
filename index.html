@@ -35,6 +35,22 @@
       width: 450px;
       height: 260px;
     }
+    .visualization-container {
+      margin-top: 20px;
+      padding: 5px; /* Ajustado al tamaño del iframe */
+      background: white;
+      border: 2px solid #0056B3;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      width: 460px; /* Ancho un poco mayor que el iframe */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .visualization-container iframe {
+      width: 450px;
+      height: 260px;
+      border: none;
+    }
     .button {
       background-color: #007BFF;
       color: white;
@@ -72,6 +88,11 @@
       <iframe src="https://thingspeak.com/channels/2761312/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=60&type=line"></iframe>
       <button class="button" id="button2" onclick="toggleRelay(2, 'https://api.thingspeak.com/update?api_key=UD36QB0C45Q03VFH&field2=')">Encender</button>
     </div>
+  </div>
+
+  <!-- Visualization -->
+  <div class="visualization-container">
+    <iframe src="https://thingspeak.mathworks.com/apps/matlab_visualizations/593319"></iframe>
   </div>
 
   <script>
